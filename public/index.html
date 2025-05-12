@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ayudante de Lectoescritura</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #3498db; --secondary-color: #2980b9; --success-color: #27ae60;
+            --error-color: #e74c3c; --text-color: #333; --light-gray: #f4f7f9;
+            --border-radius: 8px;
+        }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            margin: 0; background-color: var(--light-gray); color: var(--text-color); 
+            display: flex; justify-content: center; align-items: center; min-height: 100vh;
+        }
+        #auth-wrapper { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 400px; padding: 20px; box-sizing: border-box; }
+        .auth-form-container { border: 1px solid #ddd; padding: 25px 30px; border-radius: var(--border-radius); margin-bottom: 20px; width: 100%; background-color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .auth-form-container h2 { text-align: center; margin-top: 0; margin-bottom: 25px; color: var(--primary-color); font-size: 1.5rem; }
+        .auth-form-container label { display: block; margin-bottom: 6px; font-weight: 600; color: #555; font-size: 0.9rem; }
+        .auth-form-container input[type="text"], .auth-form-container input[type="password"], .auth-form-container input[type="email"] { width: 100%; padding: 10px; margin-bottom: 18px; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; box-sizing: border-box; }
+        .auth-form-container input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(52,152,219,0.25); outline: none; }
+        .auth-form-container button[type="submit"] { width: 100%; padding: 12px; background-color: var(--primary-color); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; font-weight: bold; transition: background-color 0.2s; }
+        .auth-form-container button[type="submit"]:hover { background-color: var(--secondary-color); }
+        .auth-form-container p { text-align: center; margin-top: 20px; font-size: 0.9rem; color: #666; }
+        .auth-form-container a { color: var(--secondary-color); text-decoration: none; font-weight: bold; }
+        .auth-form-container a:hover { text-decoration: underline; }
+        #auth-message { width: 100%; margin-top: 0; margin-bottom: 15px; text-align: center; font-weight: bold; padding: 10px; border-radius: 4px; box-sizing: border-box; display: none; }
+        .auth-message-success { color: var(--success-color); background-color: #e6ffed; border: 1px solid var(--success-color); display: block !important;}
+        .auth-message-error   { color: var(--error-color); background-color: #ffebee; border: 1px solid var(--error-color); display: block !important;}
+        .auth-message-info    { color: #0c5460; background-color: #d1ecf1; border: 1px solid #bee5eb; display: block !important;}
+        .app-main-content.hidden, #auth-wrapper.hidden, .auth-form-container.hidden { display: none !important; }
+        .small-icon-button { padding: 8px 12px; font-size: 0.9rem; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .small-icon-button:hover { opacity: 0.9; }
+        .small-icon-button i { margin-right: 5px; }
+        /* Estilos para la app principal */
+        .container.app-main-content { /* Renombrado para claridad */
+            max-width: 850px; margin: 20px auto; background: white;
+            padding: 20px; border-radius: var(--border-radius);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+        /* Tus estilos de styles.css se aplicarán aquí */
+    </style>
+</head>
+<body>
+    <div id="auth-wrapper">
+        <div id="auth-message"></div>
+        <div id="login-container" class="auth-form-container">
+            <h2>Iniciar Sesión</h2>
+            <form id="login-form">
+                <div><label for="login-username">Nombre de Usuario:</label><input type="text" id="login-username" name="username" required autocomplete="username"></div>
+                <div><label for="login-password">Contraseña:</label><input type="password" id="login-password" name="password" required autocomplete="current-password"></div>
+                <button type="submit">Entrar</button>
+            </form>
+            <p>¿No tienes cuenta? <a href="#" id="show-register-link">Crear una cuenta</a></p>
+        </div>
+        <div id="register-container" class="auth-form-container hidden">
+            <h2>Crear Cuenta</h2>
+            <form id="register-form">
+                <div><label for="register-username">Usuario (para entrar):</label><input type="text" id="register-username" name="username" required autocomplete="username"></div>
+                <div><label for="register-displayName">Tu Nombre (opcional):</label><input type="text" id="register-displayName" name="displayName" autocomplete="name"></div>
+                <div><label for="register-password">Contraseña (mín. 4):</label><input type="password" id="register-password" name="password" required autocomplete="new-password"></div>
+                <button type="submit">Crear mi Cuenta</button>
+            </form>
+            <p>¿Ya tienes cuenta? <a href="#" id="show-login-link">Iniciar sesión</a></p>
+        </div>
+    </div>
+
+    <div class="container app-main-content hidden">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 10px; background-color: #f0f0f0; border-radius: var(--border-radius);">
+            <span id="user-greeting" style="font-weight: bold; font-size: 1.1rem;"></span>
+            <button id="logout-button" class="small-icon-button" style="background-color: var(--error-color);"><i class="fas fa-sign-out-alt"></i> Salir</button>
+        </div>
+        
+        <h1>Tu Ayudante para Leer y Escribir</h1>
+        <div class="camera-section">
+            <div class="camera-controls">
+                <button id="open-camera"><i class="fas fa-camera"></i> Activar Cámara</button>
+                <button id="capture-btn" disabled><i class="fas fa-magic"></i> Capturar Texto</button>
+                <button id="flip-camera" disabled><i class="fas fa-sync-alt"></i> Cambiar Cámara</button>
+            </div>
+            <div class="camera-preview-container">
+                <div class="camera-guide">Apunta al texto</div>
+                <video id="camera-view" autoplay playsinline></video><canvas id="camera-canvas"></canvas><div id="capture-flash" class="capture-flash"></div>
+            </div>
+            <div id="ocr-status" class="ocr-status" style="text-align: center; padding: 10px; display: none;"></div>
+        </div>
+        <div class="text-input">
+            <div class="label-container">
+                <label for="input-text">Texto leído o escrito:</label>
+                <button id="dictate-button" class="small-icon-button" aria-label="Dictar texto"><i class="fas fa-microphone"></i></button>
+            </div>
+            <textarea id="input-text" rows="6" placeholder="Aquí aparecerá el texto de la cámara o puedes escribir/dictar..."></textarea>
+            <button id="check-text-btn" style="margin-top: 10px; width: auto; background-color: var(--success-color); display: none;"><i class="fas fa-check"></i> Revisar Texto</button>
+        </div>
+        <div class="text-output">
+            <label>Texto Revisado:</label><div id="output-text" class="output-display"></div>
+        </div>
+        <div id="api-status" class="api-status"></div>
+        <div class="stats"><span id="error-count">0 errores</span></div>
+        <section class="ai-section">
+            <h2><i class="fas fa-graduation-cap"></i> Zona de Aprendizaje</h2>
+            <div class="ai-tabs">
+                <button class="ai-tab active" id="suggestions-tab"><i class="fas fa-lightbulb"></i> Consejos</button> <!-- Consejos activa por defecto -->
+                <button class="ai-tab" id="exercises-tab"><i class="fas fa-pencil-ruler"></i> Ejercicios</button>
+                <button class="ai-tab" id="progress-tab"><i class="fas fa-chart-line"></i> Mis Avances</button>
+            </div>
+            <div id="ai-suggestions" class="ai-tabcontent active"> <!-- Contenido de Consejos activo por defecto -->
+                <h3><i class="fas fa-comment-dots"></i> Consejos de Profe Amigo</h3>
+                <p id="ai-feedback-placeholder">Revisa tu texto y aquí aparecerán explicaciones.</p>
+                <div id="ai-feedback" class="ai-feedback"></div>
+            </div>
+            <div id="ai-exercises" class="ai-tabcontent">
+                <h3><i class="fas fa-pencil-ruler"></i> Ejercicios para Practicar</h3>
+                <p>Genera ejercicios basados en el texto.</p>
+                <button id="generate-exercises-btn" class="ai-button"><i class="fas fa-plus-circle"></i> Crear Nuevos Ejercicios</button>
+                <div id="exercises-container"></div>
+            </div>
+            <div id="ai-progress" class="ai-tabcontent">
+                <h3><i class="fas fa-star"></i> Mis Avances</h3>
+                <div class="progress-metrics">
+                    <div class="metric"><span class="metric-value" id="user-level">Inicial</span><span class="metric-label">Nivel</span></div>
+                    <div class="metric"><span class="metric-value" id="streak-count">0</span><span class="metric-label">Racha</span></div>
+                </div>
+                <div id="practice-areas-list" class="practice-suggestion" style="display: none;"></div>
+                <div id="achievements-badge" style="margin-top: 15px; text-align: center;"></div>
+            </div>
+        </section>
+        <section class="chat-section">
+            <h2><i class="fas fa-comments"></i> Chat Rápido</h2>
+            <div id="chat-messages" class="chat-messages"></div>
+            <div class="chat-input-area">
+                <input type="text" id="chat-input" placeholder="Escribe tu pregunta..." aria-label="Entrada chat">
+                <button id="talk-button" aria-label="Hablar al chatbot"><i class="fas fa-microphone"></i></button>
+                <button id="chat-send-btn" aria-label="Enviar chat"><i class="fas fa-paper-plane"></i> Enviar</button>
+            </div>
+        </section>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@latest/dist/tesseract.min.js'></script>
+    
+    <!-- Scripts de IA (dentro de public/ia/) -->
+    <script src="ia/userProfile.js"></script>
+    <script src="ia/languageAnalysis.js"></script>
+    <script src="ia/exercisesGenerator.js"></script>
+    
+    <script src="auth.js"></script> <!-- Lógica de autenticación -->
+    <script src="script.js"></script> <!-- Lógica principal de la aplicación -->
+    
+    <!-- Script en línea para inicializar funcionalidades que dependen de clases de IA -->
+    <script>
+        document.addEventListener('userAuthenticated', () => {
+            console.log('INDEX.HTML: Evento userAuthenticated recibido. Configurando instancias y listeners de IA.');
+
+            // Instanciar clases de IA y asignarlas a window para acceso global si es necesario
+            if (typeof UserProfileManager !== 'undefined' && !window.userProfileManagerInstance) {
+                try {
+                    window.userProfileManagerInstance = new UserProfileManager();
+                    console.log("INDEX.HTML: Instancia de UserProfileManager creada.");
+                    window.userProfileManagerInstance.updateUI(); // Actualizar UI del perfil al inicio
+                } catch (e) { console.error("INDEX.HTML: Error instanciando UserProfileManager:", e); }
+            }
+
+            if (typeof LanguageAnalyzer !== 'undefined' && !window.languageAnalyzerInstance) {
+                try {
+                    window.languageAnalyzerInstance = new LanguageAnalyzer();
+                    console.log("INDEX.HTML: Instancia de LanguageAnalyzer creada.");
+                    // El listener para 'textCorrected' ya está dentro de languageAnalysis.js
+                } catch (e) { console.error("INDEX.HTML: Error instanciando LanguageAnalyzer:", e); }
+            }
+            
+            if (typeof ExerciseGenerator !== 'undefined' && !window.exerciseGeneratorInstance) {
+                try {
+                    window.exerciseGeneratorInstance = new ExerciseGenerator();
+                    console.log("INDEX.HTML: Instancia de ExerciseGenerator creada.");
+                } catch (e) { console.error("INDEX.HTML: Error instanciando ExerciseGenerator:", e); }
+            }
+
+            // Configurar listener para el botón de generar ejercicios
+            const generateExercisesBtn = document.getElementById('generate-exercises-btn');
+            const inputTextForExercises = document.getElementById('input-text');
+
+            if (generateExercisesBtn && inputTextForExercises) {
+                generateExercisesBtn.addEventListener('click', async () => {
+                    console.log('[Ejercicios Evt INDEX.HTML] Botón "Crear Nuevos Ejercicios" presionado.');
+                    const text = inputTextForExercises.value;
+                    console.log('[Ejercicios Evt INDEX.HTML] Texto para ejercicios:', text ? `"${text.substring(0,30)}..."` : "(vacío)");
+
+                    if (window.exerciseGeneratorInstance) {
+                        if (text && text.trim().length >= window.exerciseGeneratorInstance.minLength) { // Usa minLength de la instancia
+                            generateExercisesBtn.disabled = true;
+                            generateExercisesBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creando...';
+                            try { 
+                                await window.exerciseGeneratorInstance.generateExercises(text); 
+                            } catch (errorOnClick) {
+                                 console.error("INDEX.HTML: Error durante generateExercises en click:", errorOnClick);
+                                 // Podrías mostrar un alert o mensaje en la UI aquí
+                            } finally { 
+                                 generateExercisesBtn.disabled = false; 
+                                 generateExercisesBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Crear Nuevos Ejercicios'; 
+                            }
+                        } else {
+                            alert(`Por favor, escribe al menos ${window.exerciseGeneratorInstance.minLength} ${window.exerciseGeneratorInstance.minLength === 1 ? 'carácter':'caracteres'} para generar ejercicios.`);
+                        }
+                    } else {
+                        console.warn("INDEX.HTML: Instancia de ExerciseGenerator no disponible para el botón.");
+                        alert("La herramienta para crear ejercicios no está lista. Intenta recargar la página.");
+                        generateExercisesBtn.title = "Herramienta no lista";
+                        generateExercisesBtn.style.opacity = "0.6";
+                    }
+                });
+                console.log("INDEX.HTML: Listener para #generate-exercises-btn configurado.");
+            } else { 
+                if (!generateExercisesBtn) console.warn('INDEX.HTML: Botón #generate-exercises-btn no encontrado.');
+                if (!inputTextForExercises) console.warn('INDEX.HTML: Elemento #input-text no encontrado para ejercicios.');
+            }
+        });
+    </script>
+</body>
+</html>
