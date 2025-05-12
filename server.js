@@ -47,6 +47,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Configuración de la Base de Datos MySQL
 // Esta configuración leerá las variables de entorno que configures en Render
+// En server.js
 const dbPool = mysql.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
@@ -54,12 +55,12 @@ const dbPool = mysql.createPool({
     database: process.env.DB_NAME,
     port: parseInt(process.env.DB_PORT) || 3306,
     waitForConnections: true,
-    connectionLimit: 10,
+    connectionLimit: 10, // Puedes reducir esto si es un plan gratuito con pocas conexiones
     queueLimit: 0,
     timezone: '+00:00',
-    ssl: {
-        // Intenta primero con esto. Si funciona, investiga cómo hacerlo más seguro.
-        rejectUnauthorized: false 
+    connectTimeout: 20000, // 20 segundos de timeout para la conexión
+    ssl: { // Mantén esto si sospechas que SSL es necesario
+        rejectUnauthorized: false // ¡SOLO PARA DEPURAR INICIALMENTE!
     }
 });
 
