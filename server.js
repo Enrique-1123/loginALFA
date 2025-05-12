@@ -57,12 +57,9 @@ const dbPool = mysql.createPool({
     connectionLimit: 10,
     queueLimit: 0,
     timezone: '+00:00',
-    // Opciones de SSL pueden ser necesarias dependiendo de tu proveedor de BD externa (Railway, PlanetScale)
-    // Ejemplo para PlanetScale que requiere SSL:
-    // ssl: {
-    //    rejectUnauthorized: true // O según la configuración de tu proveedor
-    //    // ca: fs.readFileSync('/path/to/ca-cert.pem') // Si te proveen un certificado CA
-    // }
+    ssl: {
+        rejectUnauthorized: false // ¡SOLO PARA DEPURAR!
+    }
 });
 
 async function testDbConnection() {
