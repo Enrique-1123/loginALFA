@@ -58,7 +58,8 @@ const dbPool = mysql.createPool({
     queueLimit: 0,
     timezone: '+00:00',
     ssl: {
-        rejectUnauthorized: false // ¡SOLO PARA DEPURAR!
+        // Intenta primero con esto. Si funciona, investiga cómo hacerlo más seguro.
+        rejectUnauthorized: false 
     }
 });
 
