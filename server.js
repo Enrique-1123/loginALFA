@@ -49,19 +49,22 @@ app.use(express.urlencoded({ extended: true }));
 // Esta configuración leerá las variables de entorno que configures en Render
 // En server.js
 const dbPool = mysql.createPool({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || '',
+    database: process.env.DB_NAME || 'proyecto_lectoescritura_db',
     port: parseInt(process.env.DB_PORT) || 3306,
     waitForConnections: true,
-    connectionLimit: 10, // Puedes reducir esto si es un plan gratuito con pocas conexiones
+    connectionLimit: 10,
     queueLimit: 0,
     timezone: '+00:00',
-    connectTimeout: 20000, // 20 segundos de timeout para la conexión
-    ssl: { // Mantén esto si sospechas que SSL es necesario
-        rejectUnauthorized: false // ¡SOLO PARA DEPURAR INICIALMENTE!
+    ssl: { // Añadir esta sección para deshabilitar SSL/TLS
+        rejectUnauthorized: false // A menudo necesario cuando ssl está deshabilitado o se usan certs autofirmados
+                                  // Para una conexión no SSL, esto podría no ser estrictamente necesario,
+                                  // pero es común verlo. Lo más importante es la ausencia de requerimiento SSL.
     }
+    // Si la opción de arriba no funciona como se espera, prueba simplemente:
+    // ssl: false, // Esto es más directo para mysql2 si solo quieres deshabilitarlo.
 });
 
 async function testDbConnection() {
