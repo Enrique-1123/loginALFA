@@ -48,6 +48,7 @@ app.use(express.urlencoded({ extended: true }));
 // Configuración de la Base de Datos MySQL
 // Esta configuración leerá las variables de entorno que configures en Render
 // En server.js
+// En server.js
 const dbPool = mysql.createPool({
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',
@@ -58,13 +59,20 @@ const dbPool = mysql.createPool({
     connectionLimit: 10,
     queueLimit: 0,
     timezone: '+00:00',
-    ssl: { // Añadir esta sección para deshabilitar SSL/TLS
-        rejectUnauthorized: false // A menudo necesario cuando ssl está deshabilitado o se usan certs autofirmados
-                                  // Para una conexión no SSL, esto podría no ser estrictamente necesario,
-                                  // pero es común verlo. Lo más importante es la ausencia de requerimiento SSL.
+    // Para mysql2, simplemente NO incluir la opción 'ssl' o ponerla explícitamente en 'false'
+    // debería ser suficiente para indicar que no se use SSL.
+    // Si el driver intenta SSL por defecto, necesitas una forma de decirle que no.
+    // Prueba primero sin ninguna opción 'ssl'. Si falla, entonces prueba:
+    // ssl: null, // o
+    // ssl: false, // o la opción de abajo que es más para cuando SÍ usas SSL pero con CAs específicas
+    /*
+    ssl: {
+        // ca: fs.readFileSync(__dirname + '/mysql-ca.crt'), // Solo si tuvieras un CA específico
+        rejectUnauthorized: false // Esto dice al cliente que no falle si el certificado del servidor no es de una CA conocida.
+                                  // Para una conexión NO SSL, esto es menos relevante, pero a veces los drivers
+                                  // tienen comportamientos por defecto que necesitan anularse.
     }
-    // Si la opción de arriba no funciona como se espera, prueba simplemente:
-    // ssl: false, // Esto es más directo para mysql2 si solo quieres deshabilitarlo.
+    */
 });
 
 async function testDbConnection() {
